@@ -10,15 +10,25 @@ Virtual gamepad hub class
 
   virtual_gamepad_hub = (function() {
     function virtual_gamepad_hub() {
-      var i, j;
+      this.currentGamepad = null;
+      /*var i, j;
       this.gamepads = [];
       for (i = j = 0; j <= 3; i = ++j) {
         this.gamepads[i] = void 0;
-      }
+      }*/
     }
 
     virtual_gamepad_hub.prototype.connectGamepad = function(callback) {
-      var freeSlot, padId;
+      if (!this.currentGamepad) {
+        this.currentGamepad = new gamepad();
+        return this.currentGamepad.connect(function() {
+          return callback(0);
+        }, function(err) {
+          return callback(-1);
+        });
+      }
+
+      /*var freeSlot, padId;
       padId = 0;
       freeSlot = false;
       while (!freeSlot && padId < 4) {
@@ -37,24 +47,35 @@ Virtual gamepad hub class
         }, function(err) {
           return callback(-1);
         });
-      }
+      }*/
     };
 
     virtual_gamepad_hub.prototype.disconnectGamepad = function(padId, callback) {
-      if (this.gamepads[padId]) {
+      if (this.currentGamepad) {
+        return this.currentGamepad.disconnect((function(_this) {
+          return function() {
+            _this.currentGamepad = null;
+            return callback();
+          };
+        })(this));
+      }
+      /*if (this.gamepads[padId]) {
         return this.gamepads[padId].disconnect((function(_this) {
           return function() {
             _this.gamepads[padId] = void 0;
             return callback();
           };
         })(this));
-      }
+      }*/
     };
 
     virtual_gamepad_hub.prototype.sendEvent = function(padId, event) {
-      if (this.gamepads[padId]) {
-        return this.gamepads[padId].sendEvent(event);
+      if (this.currentGamepad) {
+        return this.currentGamepad.sendEvent(event);
       }
+      /*if (this.gamepads[padId]) {
+        return this.gamepads[padId].sendEvent(event);
+      }*/
     };
 
     return virtual_gamepad_hub;
